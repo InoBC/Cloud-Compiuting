@@ -1,6 +1,8 @@
 const SUPABASE_URL = "https://idkrqgauvrikltsrzzgh.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlka3JxZ2F1dnJpa2x0c3J6emdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MDQ4OTQsImV4cCI6MjA3MDA4MDg5NH0.TAkxZu6MT_epcNpneIYM7JKzumJ3n0lrEvHb7TmycxU";
 
+
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 async function agregarEstudiante() {
   const nombre = document.getElementById("nombre").value;
   const correo = document.getElementById("correo").value;
@@ -71,8 +73,8 @@ async function subirArchivo() {
     alert("Sesión no válida.");
     return;
   }
+const nombreRuta = `${user.id}/${archivo.name}`;
 
-  const nombreRuta = `${user.id}/${archivo.name}`; 
   const { data, error } = await client.storage
     .from("tareas") //Nombre del bucket
     .upload(nombreRuta, archivo, {
@@ -101,7 +103,7 @@ async function listarArchivos() {
 
   const { data, error } = await client.storage
     .from("tareas")
-    .list(`${user.id}, { limit: 20 }`);
+      .list(`${user.id}`, { limit: 20 });
 
   const lista = document.getElementById("lista-archivos");
   lista.innerHTML = "";
@@ -113,8 +115,11 @@ async function listarArchivos() {
 
   data.forEach(async (archivo) => {
     const { data: signedUrlData, error: signedUrlError } = await client.storage
-      .from("tareas")
-      .createSignedUrl(`${user.id}/${archivo.name}`, 60);
+  .from("tareas")
+  .createSignedUrl(`${user.id}/${archivo.name}`, {
+    expiresIn: 60, // duración en segundos
+  });
+
 
     if (signedUrlError) {
       console.error("Error al generar URL firmada:", signedUrlError.message);
@@ -141,7 +146,7 @@ async function listarArchivos() {
         <a href="${publicUrl}" target="_blank">Ver PDF</a>
       `;
     } else {
-      item.innerHTML = '<a href="${publicUrl}" target="_blank">${archivo.name}</a>';
+      item.innerHTML = `<a href="${publicUrl}" target="_blank">${archivo.name}</a>`;
     }
 
     lista.appendChild(item);
