@@ -48,7 +48,7 @@ async function cargarEstudiantes() {
   lista.innerHTML = "";
   data.forEach((est) => {
     const item = document.createElement("li");
-    item.textContent = '${est.nombre} (${est.clase})';
+    item.textContent = `${est.nombre} (${est.clase})`;
     lista.appendChild(item);
   });
 }
@@ -73,8 +73,8 @@ async function subirArchivo() {
     alert("Sesión no válida.");
     return;
   }
+const nombreRuta = `${user.id}/${archivo.name}`;
 
-  const nombreRuta = '${user.id}/${archivo.name}'; 
   const { data, error } = await client.storage
     .from("tareas") //Nombre del bucket
     .upload(nombreRuta, archivo, {
@@ -103,7 +103,7 @@ async function listarArchivos() {
 
   const { data, error } = await client.storage
     .from("tareas")
-    .list('${user.id}, { limit: 20 }');
+      .list(`${user.id}`, { limit: 20 });
 
   const lista = document.getElementById("lista-archivos");
   lista.innerHTML = "";
@@ -143,7 +143,7 @@ async function listarArchivos() {
         <a href="${publicUrl}" target="_blank">Ver PDF</a>
       `;
     } else {
-      item.innerHTML = <a href="${publicUrl}" target="_blank">${archivo.name}</a>;
+      item.innerHTML = `<a href="${publicUrl}" target="_blank">${archivo.name}</a>`;
     }
 
     lista.appendChild(item);
