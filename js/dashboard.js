@@ -117,9 +117,8 @@ async function listarArchivos() {
   for (const archivo of data) {
     const { data: signedUrlData, error: signedUrlError } = await client.storage
       .from("tareas")
-      .createSignedUrl(`${user.id}/${archivo.name}`, {
-        expiresIn: 3600, // 1 hora
-      });
+      .createSignedUrl(`${user.id}/${archivo.name}`, 60);
+ // 1 hora
 
     if (signedUrlError) {
       console.error("Error al generar URL firmada:", signedUrlError.message);
