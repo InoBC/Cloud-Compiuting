@@ -49,9 +49,58 @@ async function cargarEstudiantes() {
 
   data.forEach((est) => {
     const item = document.createElement("li");
-    item.textContent = `${est.nombre} (${est.clase})`;
+    item.innerHTML = `
+      ${est.nombre} (${est.clase})
+      <button onclick="actualizarEstudiante(${est.id})">✏️ Actualizar</button>
+      <button onclick="borrarEstudiante(${est.id})">🗑️ Borrar</button>
+    `;
     lista.appendChild(item);
   });
+}
+
+// 🔹 Función para borrar
+async function borrarEstudiante(id) {
+  if (!confirm("¿Seguro que quieres borrar este estudiante?")) return;
+
+  const { error } = await client
+    .from("estudiantes")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Error al borrar: " + error.message);
+  } else {
+    alert("Estudiante borrado");
+    cargarEstudiantes();
+  }
+}
+
+// 🔹 Función para actualizar
+async function actualizarEstudiante(id) {
+  const nuevoNombre = prompt("Nuevo nombre:");
+  const nuevoCorreo = prompt("Nuevo correo:");
+  const nuevaClase = prompt("Nueva clase:");
+
+  if (!nuevoNombre || !nuevoCorreo || !nuevaClase) {
+    alert("Todos los campos son obligatorios.");
+    return;
+  }
+
+  const { error } = await client
+    .from("estudiantes")
+    .update({
+      nombre: nuevoNombre,
+      correo: nuevoCorreo,
+      clase: nuevaClase
+    })
+    .eq("id", id);
+
+  if (error) {
+    alert("Error al actualizar: " + error.message);
+  } else {
+    alert("Estudiante actualizado");
+    cargarEstudiantes();
+  }
 }
 
 async function subirArchivo() {
