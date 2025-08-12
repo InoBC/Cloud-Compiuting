@@ -51,8 +51,8 @@ async function cargarEstudiantes() {
     const item = document.createElement("li");
     item.innerHTML = `
       ${est.nombre} (${est.clase})
-      <button onclick="actualizarEstudiante('${est.id}')">Actualizar</button>
-      <button onclick="borrarEstudiante('${est.id}')">Borrar</button>
+      <button onclick="actualizarEstudiante('${est.id}')">Update</button>
+      <button onclick="borrarEstudiante('${est.id}')">Delete</button>
     `;
     lista.appendChild(item);
   });
