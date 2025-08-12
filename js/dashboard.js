@@ -51,8 +51,8 @@ async function cargarEstudiantes() {
     const item = document.createElement("li");
     item.innerHTML = `
       ${est.nombre} (${est.clase})
-      <button onclick="actualizarEstudiante(${est.id})">✏️ Actualizar</button>
-      <button onclick="borrarEstudiante(${est.id})">🗑️ Borrar</button>
+      <button onclick="actualizarEstudiante('${est.id}')">✏️ Actualizar</button>
+      <button onclick="borrarEstudiante('${est.id}')">🗑️ Borrar</button>
     `;
     lista.appendChild(item);
   });
@@ -77,31 +77,58 @@ async function borrarEstudiante(id) {
 
 // 🔹 Función para actualizar
 async function actualizarEstudiante(id) {
-  const nuevoNombre = prompt("Nuevo nombre:");
-  const nuevoCorreo = prompt("Nuevo correo:");
-  const nuevaClase = prompt("Nueva clase:");
+  // Primero obtenemos los datos actuales para mostrar en el modal
+  const { data, error } = await client
+    .from("estudiantes")
+    .select("nombre, correo, clase")
+    .eq("id", id)
+    .single();
 
-  if (!nuevoNombre || !nuevoCorreo || !nuevaClase) {
-    alert("Todos los campos son obligatorios.");
+  if (error) {
+    alert("Error al obtener datos: " + error.message);
     return;
   }
 
-  const { error } = await client
-    .from("estudiantes")
-    .update({
-      nombre: nuevoNombre,
-      correo: nuevoCorreo,
-      clase: nuevaClase
-    })
-    .eq("id", id);
+  const { value: formValues } = await Swal.fire({
+    title: 'Actualizar estudiante',
+    html:
+      `<input id="swal-input1" class="swal2-input" placeholder="Nombre" value="${data.nombre}">` +
+      `<input id="swal-input2" class="swal2-input" placeholder="Correo" value="${data.correo}">` +
+      `<input id="swal-input3" class="swal2-input" placeholder="Clase" value="${data.clase}">`,
+    focusConfirm: false,
+    showCancelButton: true,
+    preConfirm: () => {
+      const nombre = document.getElementById('swal-input1').value.trim();
+      const correo = document.getElementById('swal-input2').value.trim();
+      const clase = document.getElementById('swal-input3').value.trim();
 
-  if (error) {
-    alert("Error al actualizar: " + error.message);
-  } else {
-    alert("Estudiante actualizado");
-    cargarEstudiantes();
+      if (!nombre || !correo || !clase) {
+        Swal.showValidationMessage('Todos los campos son obligatorios');
+        return false;
+      }
+      return { nombre, correo, clase };
+    }
+  });
+
+  if (formValues) {
+    const { error: updateError } = await client
+      .from("estudiantes")
+      .update({
+        nombre: formValues.nombre,
+        correo: formValues.correo,
+        clase: formValues.clase
+      })
+      .eq("id", id);
+
+    if (updateError) {
+      Swal.fire('Error', updateError.message, 'error');
+    } else {
+      Swal.fire('¡Listo!', 'Estudiante actualizado', 'success');
+      cargarEstudiantes();
+    }
   }
 }
+
 
 async function subirArchivo() {
   const archivoInput = document.getElementById("archivo");
