@@ -92,9 +92,10 @@ async function actualizarEstudiante(id) {
   const { value: formValues } = await Swal.fire({
     title: 'Actualizar estudiante',
     html:
-      `<input id="swal-input1" class="swal2-input" placeholder="Nombre" value="${data.nombre}">` +
-      `<input id="swal-input2" class="swal2-input" placeholder="Correo" value="${data.correo}">` +
-      `<input id="swal-input3" class="swal2-input" placeholder="Clase" value="${data.clase}">`,
+      `<label>Nombre:<label/>
+      <input id="swal-input1" class="swal2-input" placeholder="Nombre" value="${data.nombre}">` +
+      `<label>Correo:<label/><input id="swal-input2" class="swal2-input" placeholder="Correo" value="${data.correo}">` +
+      `<label>clase:<label/><input id="swal-input3" class="swal2-input" placeholder="Clase" value="${data.clase}">`,
     focusConfirm: false,
     showCancelButton: true,
     preConfirm: () => {
