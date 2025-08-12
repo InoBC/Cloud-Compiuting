@@ -51,8 +51,8 @@ async function cargarEstudiantes() {
     const item = document.createElement("li");
     item.innerHTML = `
       ${est.nombre} (${est.clase})
-      <button onclick="actualizarEstudiante('${est.id}')">✏️ Actualizar</button>
-      <button onclick="borrarEstudiante('${est.id}')">🗑️ Borrar</button>
+      <button onclick="actualizarEstudiante('${est.id}')">Actualizar</button>
+      <button onclick="borrarEstudiante('${est.id}')">Borrar</button>
     `;
     lista.appendChild(item);
   });
@@ -60,24 +60,36 @@ async function cargarEstudiantes() {
 
 // 🔹 Función para borrar
 async function borrarEstudiante(id) {
-  if (!confirm("¿Seguro que quieres borrar este estudiante?")) return;
+  const result = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: "No podrás revertir esta acción",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Sí, borrar',
+    cancelButtonText: 'Cancelar'
+  });
 
-  const { error } = await client
-    .from("estudiantes")
-    .delete()
-    .eq("id", id);
+  if (result.isConfirmed) {
+    const { error } = await client
+      .from("estudiantes")
+      .delete()
+      .eq("id", id);
 
-  if (error) {
-    alert("Error al borrar: " + error.message);
-  } else {
-    alert("Estudiante borrado");
-    cargarEstudiantes();
+    if (error) {
+      Swal.fire('Error', error.message, 'error');
+    } else {
+      Swal.fire('Borrado', 'El estudiante ha sido borrado.', 'success');
+      cargarEstudiantes();
+    }
   }
 }
 
+
 // 🔹 Función para actualizar
 async function actualizarEstudiante(id) {
-  // Primero obtenemos los datos actuales para mostrar en el modal
+  // Obtener datos actuales
   const { data, error } = await client
     .from("estudiantes")
     .select("nombre, correo, clase")
@@ -85,17 +97,19 @@ async function actualizarEstudiante(id) {
     .single();
 
   if (error) {
-    alert("Error al obtener datos: " + error.message);
+    Swal.fire('Error', 'No se pudo obtener los datos', 'error');
     return;
   }
 
   const { value: formValues } = await Swal.fire({
     title: 'Actualizar estudiante',
     html:
-      `<label>Nombre:<label/>
-      <input id="swal-input1" class="swal2-input" placeholder="Nombre" value="${data.nombre}">` +
-      `<label>Correo:<label/><input id="swal-input2" class="swal2-input" placeholder="Correo" value="${data.correo}">` +
-      `<label>clase:<label/><input id="swal-input3" class="swal2-input" placeholder="Clase" value="${data.clase}">`,
+      `<label>Nombre:</label>` +
+      `<input id="swal-input1" class="swal2-input" placeholder="Nombre" value="${data.nombre}">` +
+      `<label>Correo:</label>` +
+      `<input id="swal-input2" class="swal2-input" placeholder="Correo" value="${data.correo}">` +
+      `<label>Clase:</label>` +
+      `<input id="swal-input3" class="swal2-input" placeholder="Clase" value="${data.clase}">`,
     focusConfirm: false,
     showCancelButton: true,
     preConfirm: () => {
@@ -129,6 +143,7 @@ async function actualizarEstudiante(id) {
     }
   }
 }
+
 
 
 async function subirArchivo() {
